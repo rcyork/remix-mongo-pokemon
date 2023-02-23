@@ -513,8 +513,31 @@ video {
   --tw-backdrop-sepia:  ;
 }
 
+.pointer-events-none {
+  pointer-events: none;
+}
+
+.pointer-events-auto {
+  pointer-events: auto;
+}
+
+.fixed {
+  position: fixed;
+}
+
 .absolute {
   position: absolute;
+}
+
+.relative {
+  position: relative;
+}
+
+.inset-0 {
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  left: 0px;
 }
 
 .top-8 {
@@ -523,6 +546,18 @@ video {
 
 .right-8 {
   right: 2rem;
+}
+
+.top-4 {
+  top: 1rem;
+}
+
+.right-4 {
+  right: 1rem;
+}
+
+.left-8 {
+  left: 2rem;
 }
 
 .my-2 {
@@ -550,12 +585,20 @@ video {
   height: 100%;
 }
 
+.max-h-screen {
+  max-height: 100vh;
+}
+
 .w-full {
   width: 100%;
 }
 
 .w-96 {
   width: 24rem;
+}
+
+.w-2\/3 {
+  width: 66.666667%;
 }
 
 .flex-col {
@@ -572,6 +615,14 @@ video {
 
 .gap-y-4 {
   row-gap: 1rem;
+}
+
+.overflow-scroll {
+  overflow: scroll;
+}
+
+.overflow-y-auto {
+  overflow-y: auto;
 }
 
 .rounded-xl {
@@ -602,12 +653,29 @@ video {
   background-color: rgb(229 231 235 / var(--tw-bg-opacity));
 }
 
+.bg-gray-600 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(75 85 99 / var(--tw-bg-opacity));
+}
+
+.bg-opacity-80 {
+  --tw-bg-opacity: 0.8;
+}
+
 .p-2 {
   padding: 0.5rem;
 }
 
 .p-6 {
   padding: 1.5rem;
+}
+
+.p-4 {
+  padding: 1rem;
+}
+
+.p-10 {
+  padding: 2.5rem;
 }
 
 .px-3 {
@@ -694,4 +762,10 @@ video {
 .hover\:bg-yellow-400:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(250 204 21 / var(--tw-bg-opacity));
+}
+
+@media (min-width: 768px) {
+  .md\:rounded-xl {
+    border-radius: 0.75rem;
+  }
 }
