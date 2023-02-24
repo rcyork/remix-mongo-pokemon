@@ -1,16 +1,27 @@
-import { type LoaderFunction } from '@remix-run/node'
-import { useNavigate } from '@remix-run/react'
+import { json, type LoaderFunction } from '@remix-run/node'
+import { useLoaderData, useNavigate } from '@remix-run/react'
 import { Outlet } from 'react-router-dom'
 import { Layout } from '~/components/Layout'
 import { requireUserId } from '~/utils/auth.server'
+import { getFilteredPokemon } from '~/utils/pokemon.server'
+import { type Pokemon as IPokemon, type Profile } from '@prisma/client'
 
 export const loader: LoaderFunction = async ({ request }) => {
-  await requireUserId(request)
-  return null
+  const userId = await requireUserId(request)
+  const createdPokemon = await getFilteredPokemon(userId, {}, {})
+  return json({ createdPokemon })
+}
+
+interface PokemonWithAuthor extends IPokemon {
+  author: {
+    profile: Profile
+  }
 }
 
 export default function Home() {
   const navigate = useNavigate()
+  const { createdPokemon } = useLoaderData()
+
   return (
     <Layout>
       <Outlet />
@@ -28,6 +39,21 @@ export default function Home() {
       >
         Create Pokemon
       </button>
+      <div className="flex flex-col">
+        {/* search bar */}
+        <div className="flex flex-1">
+          <div className="flex w-full flex-col gap-y-4 p-10">
+            <h2>feed</h2>
+            {createdPokemon.map((char: PokemonWithAuthor) => {
+              return (
+                <p className="text-white" key={char.id}>
+                  {char.name}
+                </p>
+              )
+            })}
+          </div>
+        </div>
+      </div>
     </Layout>
   )
 }

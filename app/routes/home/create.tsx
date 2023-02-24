@@ -1,18 +1,75 @@
-import { type LoaderFunction } from '@remix-run/node'
-import { useLoaderData } from '@remix-run/react'
+import { json, type ActionFunction } from '@remix-run/node'
+import { useActionData } from '@remix-run/react'
+import React from 'react'
+import { redirect } from 'react-router-dom'
+import { FormField } from '~/components/form-field'
 import { Modal } from '~/components/modal'
 import { requireUserId } from '~/utils/auth.server'
+import { createPokemon } from '~/utils/pokemon.server'
 
-const loader: LoaderFunction = async ({ request }) => {
+export const action: ActionFunction = async ({ request }) => {
+  const form = await request.formData()
   const userId = await requireUserId(request)
-  return userId
+  const name = form.get('name')
+  const weight = form.get('weight')
+
+  if (typeof name !== 'string' || typeof weight !== 'string') {
+    return json({ error: 'Invalid form data' }, { status: 400 })
+  }
+  if (!name.length) {
+    return json({ error: 'Please provide a name' }, { status: 400 })
+  }
+
+  if (parseInt(weight) <= 0) {
+    return json({ error: 'Please provide a positive weight' }, { status: 400 })
+  }
+
+  await createPokemon(name, weight, userId)
+  return redirect('/home')
 }
 
 export default function PokemonModal() {
-  const userId = useLoaderData()
+  const actionData = useActionData()
+  const [formError] = React.useState(actionData?.error || '')
+  const [formData, setFormData] = React.useState({
+    name: '',
+    weight: 0,
+  })
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    field: string,
+  ) => {
+    setFormData((form) => ({ ...form, [field]: e.target.value }))
+  }
   return (
     <Modal isOpen={true} className="w-2/3 p-10">
-      <h2>this is a modal</h2>
+      {formError ? (
+        <div className="mb-2 w-full text-center text-xs font-semibold tracking-wide text-red-500">
+          {formError}
+        </div>
+      ) : null}
+
+      <form method="post">
+        <FormField
+          htmlFor="name"
+          label="Name"
+          value={formData.name}
+          onChange={(e) => handleChange(e, 'name')}
+        />
+        <FormField
+          htmlFor="weight"
+          label="Weight"
+          value={formData.weight}
+          onChange={(e) => handleChange(e, 'weight')}
+          type="number"
+        />
+        <button
+          type="submit"
+          className="mt-4 rounded-xl bg-yellow-300 px-3 py-2 font-semibold text-blue-600 transition duration-300 ease-in-out hover:-translate-y-1 hover:bg-yellow-400"
+        >
+          Create
+        </button>
+      </form>
     </Modal>
   )
 }
