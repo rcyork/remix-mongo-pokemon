@@ -31,11 +31,3 @@ model Pokemon {
   authorId String @db.ObjectId 
 }
 
-enum Color {
-  RED
-  GREEN
-  YELLOW
-  BLUE
-  WHITE
-}
-

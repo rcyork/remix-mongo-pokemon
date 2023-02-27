@@ -19,6 +19,32 @@ export const createPokemon = async (
   })
 }
 
+
+
+export const updatePokemon = async (
+  name: string,
+  weight: string,
+  id: string,
+) => {
+  await prisma.pokemon.update({
+    where: {
+      id,
+    },
+    data: {
+      name,
+      weight,
+    },
+  })
+}
+
+export const getPokemonById = async (id: string) => {
+  return await prisma.pokemon.findUnique({
+    where: {
+      id,
+    },
+  })
+}
+
 export const getFilteredPokemon = async (
   userId: string,
   sortFilter: Prisma.PokemonOrderByWithRelationInput,

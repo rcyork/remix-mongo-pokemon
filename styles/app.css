@@ -1,3 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.pokemon-card-grid {
+  display: grid;
+  grid-template-rows: 1fr max-content;
+}

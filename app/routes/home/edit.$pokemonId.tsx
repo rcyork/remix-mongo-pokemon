@@ -1,19 +1,34 @@
-import { json, type ActionFunction } from '@remix-run/node'
-import { useActionData } from '@remix-run/react'
+import { json, type LoaderFunction, type ActionFunction } from '@remix-run/node'
+import { useActionData, useLoaderData } from '@remix-run/react'
 import React from 'react'
-import { redirect } from 'react-router-dom'
+import { redirect, useSubmit } from 'react-router-dom'
 import { FormField } from '~/components/form-field'
 import { Modal } from '~/components/modal'
-import { requireUserId } from '~/utils/auth.server'
-import { createPokemon } from '~/utils/pokemon.server'
+import { getPokemonById, updatePokemon } from '~/utils/pokemon.server'
+
+export const loader: LoaderFunction = async ({ params }) => {
+  const { pokemonId } = params
+
+  if (typeof pokemonId !== 'string') {
+    return redirect('/home')
+  }
+
+  const pokemon = await getPokemonById(pokemonId)
+
+  return json(pokemon)
+}
 
 export const action: ActionFunction = async ({ request }) => {
   const form = await request.formData()
-  const userId = await requireUserId(request)
   const name = form.get('name')
   const weight = form.get('weight')
+  const id = form.get('id')
 
-  if (typeof name !== 'string' || typeof weight !== 'string') {
+  if (
+    typeof name !== 'string' ||
+    typeof weight !== 'string' ||
+    typeof id !== 'string'
+  ) {
     return json({ error: 'Invalid form data' }, { status: 400 })
   }
   if (!name.length) {
@@ -24,23 +39,41 @@ export const action: ActionFunction = async ({ request }) => {
     return json({ error: 'Please provide a positive weight' }, { status: 400 })
   }
 
-  await createPokemon(name, weight, userId)
+  await updatePokemon(name, weight, id)
   return redirect('/home')
 }
 
 export default function PokemonModal() {
   const actionData = useActionData()
   const [formError] = React.useState(actionData?.error || '')
+  const pokemon = useLoaderData()
+
   const [formData, setFormData] = React.useState({
-    name: '',
-    weight: '0',
+    name: pokemon.name,
+    weight: pokemon.weight,
   })
+
+  const isValid =
+    formData.name !== pokemon.name || formData.weight !== pokemon.weight
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     field: string,
   ) => {
     setFormData((form) => ({ ...form, [field]: e.target.value }))
   }
+
+  const submit = useSubmit()
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const form = event.currentTarget
+    const data = new FormData(form)
+    data.set('id', pokemon.id)
+
+    submit(data, { method: 'post' })
+  }
+
   return (
     <Modal isOpen={true} className="w-2/3 p-10">
       {formError ? (
@@ -49,7 +82,7 @@ export default function PokemonModal() {
         </div>
       ) : null}
 
-      <form method="post">
+      <form method="post" onSubmit={handleSubmit}>
         <FormField
           htmlFor="name"
           label="Name"
@@ -65,9 +98,15 @@ export default function PokemonModal() {
         />
         <button
           type="submit"
-          className="mt-4 rounded-xl bg-yellow-300 px-3 py-2 font-semibold text-blue-600 transition duration-300 ease-in-out hover:-translate-y-1 hover:bg-yellow-400"
+          className={`mt-4 rounded-xl bg-yellow-300
+              px-3 py-2 font-semibold text-blue-600 transition duration-300 ease-in-out  ${
+                isValid
+                  ? 'hover:-translate-y-1 hover:bg-yellow-400'
+                  : 'bg-opacity-50 text-blue-400'
+              }`}
+          disabled={!isValid}
         >
-          Create
+          Update
         </button>
       </form>
     </Modal>
