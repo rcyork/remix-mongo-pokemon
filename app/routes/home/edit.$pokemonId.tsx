@@ -3,6 +3,7 @@ import { useActionData, useLoaderData } from '@remix-run/react'
 import React from 'react'
 import { redirect, useSubmit } from 'react-router-dom'
 import { FormField } from '~/components/form-field'
+import { ImageUploader } from '~/components/image-uploader'
 import { Modal } from '~/components/modal'
 import { getPokemonById, updatePokemon } from '~/utils/pokemon.server'
 
@@ -22,12 +23,14 @@ export const action: ActionFunction = async ({ request }) => {
   const form = await request.formData()
   const name = form.get('name')
   const weight = form.get('weight')
+  const avatar = form.get('avatar')
   const id = form.get('id')
 
   if (
     typeof name !== 'string' ||
     typeof weight !== 'string' ||
-    typeof id !== 'string'
+    typeof id !== 'string' ||
+    typeof avatar !== 'string'
   ) {
     return json({ error: 'Invalid form data' }, { status: 400 })
   }
@@ -39,7 +42,7 @@ export const action: ActionFunction = async ({ request }) => {
     return json({ error: 'Please provide a positive weight' }, { status: 400 })
   }
 
-  await updatePokemon(name, weight, id)
+  await updatePokemon(name, weight, avatar, id)
   return redirect('/home')
 }
 
@@ -49,8 +52,9 @@ export default function PokemonModal() {
   const pokemon = useLoaderData()
 
   const [formData, setFormData] = React.useState({
-    name: pokemon.name,
-    weight: pokemon.weight,
+    name: actionData?.fields?.name || pokemon.name,
+    weight: actionData?.fields?.weight || pokemon.weight,
+    avatar: actionData?.fields?.avatar || pokemon.avatar || '',
   })
 
   const isValid =
@@ -74,6 +78,22 @@ export default function PokemonModal() {
     submit(data, { method: 'post' })
   }
 
+  const handleFileUpload = async (file: File) => {
+    let inputFormData = new FormData()
+    inputFormData.append('avatar', file)
+
+    const response = await fetch(`/avatar/${pokemon.id}`, {
+      method: 'POST',
+      body: inputFormData,
+    })
+    const { avatarUrl } = await response.json()
+
+    setFormData({
+      ...formData,
+      avatar: avatarUrl,
+    })
+  }
+
   return (
     <Modal isOpen={true} className="w-2/3 p-10">
       {formError ? (
@@ -83,31 +103,41 @@ export default function PokemonModal() {
       ) : null}
 
       <form method="post" onSubmit={handleSubmit}>
-        <FormField
-          htmlFor="name"
-          label="Name"
-          value={formData.name}
-          onChange={(e) => handleChange(e, 'name')}
-        />
-        <FormField
-          htmlFor="weight"
-          label="Weight"
-          value={formData.weight}
-          onChange={(e) => handleChange(e, 'weight')}
-          type="number"
-        />
-        <button
-          type="submit"
-          className={`mt-4 rounded-xl bg-yellow-300
+        <div className="flex ">
+          <div className="mr-8 flex items-center">
+            <ImageUploader
+              onChange={handleFileUpload}
+              avatarUrl={formData.avatar || ''}
+            />
+          </div>
+          <div className=" flex flex-1 flex-col">
+            <FormField
+              htmlFor="name"
+              label="Name"
+              value={formData.name}
+              onChange={(e) => handleChange(e, 'name')}
+            />
+            <FormField
+              htmlFor="weight"
+              label="Weight"
+              value={formData.weight}
+              onChange={(e) => handleChange(e, 'weight')}
+              type="number"
+            />
+            <button
+              type="submit"
+              className={`mt-4 rounded-xl bg-yellow-300
               px-3 py-2 font-semibold text-blue-600 transition duration-300 ease-in-out  ${
                 isValid
                   ? 'hover:-translate-y-1 hover:bg-yellow-400'
                   : 'bg-opacity-50 text-blue-400'
               }`}
-          disabled={!isValid}
-        >
-          Update
-        </button>
+              disabled={!isValid}
+            >
+              Update
+            </button>
+          </div>
+        </div>
       </form>
     </Modal>
   )

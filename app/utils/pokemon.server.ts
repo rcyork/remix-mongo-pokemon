@@ -24,6 +24,7 @@ export const createPokemon = async (
 export const updatePokemon = async (
   name: string,
   weight: string,
+  avatar: string,
   id: string,
 ) => {
   await prisma.pokemon.update({
@@ -33,6 +34,15 @@ export const updatePokemon = async (
     data: {
       name,
       weight,
+      avatar: avatar,
+    },
+  })
+}
+
+export const deletePokemonById = async (id: string) => {
+  await prisma.pokemon.delete({
+    where: {
+      id,
     },
   })
 }
@@ -60,6 +70,7 @@ export const getFilteredPokemon = async (
       id: true,
       name: true,
       weight: true,
+      avatar: true,
       author: {
         select: {
           profile: true,

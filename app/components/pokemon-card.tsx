@@ -1,4 +1,4 @@
-import { Outlet, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { type PokemonWithAuthor } from '~/routes/home'
 
 type PokemonCardProps = {
@@ -7,19 +7,31 @@ type PokemonCardProps = {
 
 export const PokemonCard: React.FC<PokemonCardProps> = ({ char }) => {
   const navigate = useNavigate()
+  const avatar = char.avatar
+
   return (
     <>
-      <Outlet />
       <div className="pokemon-card-grid h-52 w-52 rounded border-2 border-solid border-yellow-300 p-4 text-white">
-        <div className="flex h-full w-full items-center justify-center">
-          {char.name}
+        <div className="flex flex-col">
+          {avatar ? <img src={avatar} alt="pokemon avatar" /> : null}
+          <div className="flex h-full w-full items-center justify-center">
+            {char.name}
+          </div>
         </div>
-        <button
-          onClick={() => navigate(`/home/edit/${char.id}`)}
-          className="rounded-xl bg-yellow-300 px-3 py-2 font-semibold text-blue-600 transition duration-300 ease-in-out hover:-translate-y-1 hover:bg-yellow-400"
-        >
-          Edit
-        </button>
+        <div className="flex justify-between">
+          <button
+            onClick={() => navigate(`/home/edit/${char.id}`)}
+            className="rounded-xl bg-yellow-300 px-3 py-2 font-semibold text-blue-600 transition duration-300 ease-in-out hover:-translate-y-1 hover:bg-yellow-400"
+          >
+            Edit
+          </button>
+          <button
+            onClick={() => navigate(`/home/delete/${char.id}`)}
+            className="rounded-xl bg-red-500 px-3 py-2 font-semibold text-white transition duration-300 ease-in-out hover:-translate-y-1 hover:bg-red-700"
+          >
+            Delete
+          </button>
+        </div>
       </div>
     </>
   )

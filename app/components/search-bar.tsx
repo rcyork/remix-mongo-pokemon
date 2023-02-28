@@ -26,7 +26,7 @@ export function SearchBar() {
   }
 
   return (
-    <form className="flex h-20 w-full items-center gap-x-4 border-b-4 border-b-blue-900 border-opacity-30 ">
+    <form className="mt-4 flex h-20 w-full items-center gap-x-4 border-b-4 border-b-blue-900 border-opacity-30 pb-8">
       <div className={`flex w-2/5 items-center`}>
         <input
           type="text"

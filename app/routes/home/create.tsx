@@ -41,6 +41,7 @@ export default function PokemonModal() {
   ) => {
     setFormData((form) => ({ ...form, [field]: e.target.value }))
   }
+
   return (
     <Modal isOpen={true} className="w-2/3 p-10">
       {formError ? (
