@@ -1,8 +1,8 @@
 import { useNavigate } from 'react-router-dom'
-import { type PokemonWithAuthor } from '~/routes/home'
+import { type Pokemon } from '~/routes/home'
 
 type PokemonCardProps = {
-  char: PokemonWithAuthor
+  char: Pokemon
 }
 
 export const PokemonCard: React.FC<PokemonCardProps> = ({ char }) => {
@@ -11,27 +11,52 @@ export const PokemonCard: React.FC<PokemonCardProps> = ({ char }) => {
 
   return (
     <>
-      <div className="pokemon-card-grid h-52 w-52 rounded border-2 border-solid border-yellow-300 p-4 text-white">
-        <div className="flex flex-col">
-          {avatar ? <img src={avatar} alt="pokemon avatar" /> : null}
-          <div className="flex h-full w-full items-center justify-center">
-            {char.name}
+      <div
+        className={`${
+          char.author ? 'pokemon-card-grid-with-author' : 'pokemon-card-grid'
+        } h-80 w-72 rounded border-2 border-solid border-yellow-300 p-4 text-white`}
+      >
+        {char.author ? (
+          <div className="flex w-full justify-end">
+            <span className=" w-max rounded-xl bg-yellow-300 px-3 py-2 text-xs font-semibold text-blue-600">
+              user created
+            </span>
+          </div>
+        ) : null}
+        <div className="pokemon-card-grid">
+          {avatar ? (
+            <div
+              style={{
+                backgroundImage: `url('${avatar}')`,
+              }}
+              className="flex h-full w-full flex-1 bg-contain bg-center bg-no-repeat"
+            ></div>
+          ) : null}
+          <div className="my-2 flex flex-col items-center justify-center">
+            <div className="flex items-center justify-center">
+              name: {char.name}
+            </div>
+            <div className="flex items-center justify-center">
+              weight: {char.weight}
+            </div>
           </div>
         </div>
-        <div className="flex justify-between">
-          <button
-            onClick={() => navigate(`/home/edit/${char.id}`)}
-            className="rounded-xl bg-yellow-300 px-3 py-2 font-semibold text-blue-600 transition duration-300 ease-in-out hover:-translate-y-1 hover:bg-yellow-400"
-          >
-            Edit
-          </button>
-          <button
-            onClick={() => navigate(`/home/delete/${char.id}`)}
-            className="rounded-xl bg-red-500 px-3 py-2 font-semibold text-white transition duration-300 ease-in-out hover:-translate-y-1 hover:bg-red-700"
-          >
-            Delete
-          </button>
-        </div>
+        {char.author ? (
+          <div className="flex justify-between gap-4">
+            <button
+              onClick={() => navigate(`/home/edit/${char.id}`)}
+              className="w-full rounded-xl bg-yellow-300 px-3 py-2 font-semibold text-blue-600 transition duration-300 ease-in-out hover:-translate-y-1 hover:bg-yellow-400"
+            >
+              Edit
+            </button>
+            <button
+              onClick={() => navigate(`/home/delete/${char.id}`)}
+              className="w-full rounded-xl bg-red-500 px-3 py-2 font-semibold text-white transition duration-300 ease-in-out hover:-translate-y-1 hover:bg-red-700"
+            >
+              Delete
+            </button>
+          </div>
+        ) : null}
       </div>
     </>
   )

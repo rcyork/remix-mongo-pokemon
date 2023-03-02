@@ -21,12 +21,7 @@ export const createPokemon = async (
 
 
 
-export const updatePokemon = async (
-  name: string,
-  weight: string,
-  avatar: string,
-  id: string,
-) => {
+export const updatePokemon = async (name: string, weight: string, id: string) => {
   await prisma.pokemon.update({
     where: {
       id,
@@ -34,7 +29,6 @@ export const updatePokemon = async (
     data: {
       name,
       weight,
-      avatar: avatar,
     },
   })
 }

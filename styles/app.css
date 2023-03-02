@@ -6,3 +6,8 @@
   display: grid;
   grid-template-rows: 1fr max-content;
 }
+
+.pokemon-card-grid-with-author {
+  display: grid;
+  grid-template-rows: max-content 1fr max-content;
+}

@@ -10,12 +10,16 @@ export function SearchBar() {
   const clearFilters = () => {
     searchParams.delete('filter')
     searchParams.delete('sort')
+    setFormData({
+      filter: '',
+      sort: '',
+    })
     navigate('/home')
   }
 
   const [formData, setFormData] = React.useState({
-    filter: searchParams.get('filter') ?? undefined,
-    sort: searchParams.get('sort') ?? undefined,
+    filter: searchParams.get('filter') ?? '',
+    sort: searchParams.get('sort') ?? '',
   })
 
   const handleInputChange = (

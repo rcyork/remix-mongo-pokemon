@@ -23,14 +23,12 @@ export const action: ActionFunction = async ({ request }) => {
   const form = await request.formData()
   const name = form.get('name')
   const weight = form.get('weight')
-  const avatar = form.get('avatar')
   const id = form.get('id')
 
   if (
     typeof name !== 'string' ||
     typeof weight !== 'string' ||
-    typeof id !== 'string' ||
-    typeof avatar !== 'string'
+    typeof id !== 'string'
   ) {
     return json({ error: 'Invalid form data' }, { status: 400 })
   }
@@ -42,7 +40,7 @@ export const action: ActionFunction = async ({ request }) => {
     return json({ error: 'Please provide a positive weight' }, { status: 400 })
   }
 
-  await updatePokemon(name, weight, avatar, id)
+  await updatePokemon(name, weight, id)
   return redirect('/home')
 }
 

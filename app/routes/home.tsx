@@ -12,6 +12,22 @@ import {
 import { SearchBar } from '~/components/search-bar'
 import { PokemonCard } from '~/components/pokemon-card'
 
+type RealCharRaw = {
+  name: string
+  url: string
+}
+
+type RealChar = {
+  id: string
+  name: string
+  weight: number
+  sprites: RealCharSprites
+}
+
+type RealCharSprites = {
+  front_default: string
+}
+
 export const loader: LoaderFunction = async ({ request }) => {
   const userId = await requireUserId(request)
   const url = new URL(request.url)
@@ -58,7 +74,36 @@ export const loader: LoaderFunction = async ({ request }) => {
     sortOptions,
     textFilter,
   )
-  return json({ createdPokemon })
+
+  const formattedCreatedPokemon = createdPokemon.map((char) => {
+    return {
+      ...char,
+      author: true,
+    }
+  })
+
+  const res = await fetch('https://pokeapi.co/api/v2/pokemon?limit=10')
+  const pokemonList = await res.json()
+  const realPokemonRaw = await Promise.all(
+    pokemonList.results.map(async (char: RealCharRaw) => {
+      const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${char.name}`)
+      return await res.json()
+    }),
+  )
+
+  const formattedRealPokemon: Pokemon[] = realPokemonRaw.map(
+    (char: RealChar) => {
+      return {
+        id: char.id,
+        name: char.name,
+        weight: char.weight.toString(),
+        avatar: char.sprites.front_default,
+        author: false,
+      }
+    },
+  )
+
+  return json({ formattedCreatedPokemon, formattedRealPokemon })
 }
 
 export interface PokemonWithAuthor extends IPokemon {
@@ -67,9 +112,21 @@ export interface PokemonWithAuthor extends IPokemon {
   }
 }
 
+export type Pokemon = {
+  id: string
+  name: string
+  weight: string
+  avatar?: string
+  userId?: string
+  author: boolean
+}
+
 export default function Home() {
   const navigate = useNavigate()
-  const { createdPokemon } = useLoaderData()
+  const { formattedCreatedPokemon, formattedRealPokemon } = useLoaderData()
+  console.log('AAAAAAAA', formattedCreatedPokemon)
+
+  const allPokemon = [...formattedCreatedPokemon, ...formattedRealPokemon]
 
   return (
     <Layout>
@@ -96,8 +153,8 @@ export default function Home() {
             </button>
           </div>
           <div className="flex w-full flex-1 flex-col gap-y-4">
-            <div className="grid w-fit grid-flow-col gap-4">
-              {createdPokemon.map((char: PokemonWithAuthor) => {
+            <div className="flex flex-wrap gap-4">
+              {allPokemon.map((char: Pokemon) => {
                 return <PokemonCard key={char.id} char={char} />
               })}
             </div>
@@ -107,25 +164,3 @@ export default function Home() {
     </Layout>
   )
 }
-
-// import { json, type LoaderFunction } from '@remix-run/node'
-// import { useLoaderData } from '@remix-run/react'
-// import { requireUserId } from '~/utils/auth.server'
-
-// type Pokemon = {
-//   count: number
-//   next: string | null
-//   previous: string | null
-//   results: Char[]
-// }
-
-// type Char = {
-//   name: string
-//   url: string
-// }
-
-// export const loader: LoaderFunction = async ({ request }) => {
-//   await requireUserId(request)
-//   const res = await fetch('https://pokeapi.co/api/v2/pokemon?limit=10')
-//   return json(await res.json())
-// }
