@@ -11,9 +11,14 @@ export const action: ActionFunction = async ({ request }) => {
   const form = await request.formData()
   const userId = await requireUserId(request)
   const name = form.get('name')
+  const height = form.get('height')
   const weight = form.get('weight')
 
-  if (typeof name !== 'string' || typeof weight !== 'string') {
+  if (
+    typeof name !== 'string' ||
+    typeof height !== 'string' ||
+    typeof weight !== 'string'
+  ) {
     return json({ error: 'Invalid form data' }, { status: 400 })
   }
   if (!name.length) {
@@ -24,7 +29,7 @@ export const action: ActionFunction = async ({ request }) => {
     return json({ error: 'Please provide a positive weight' }, { status: 400 })
   }
 
-  await createPokemon(name, weight, userId)
+  await createPokemon(name, height, weight, userId)
   return redirect('/home')
 }
 
@@ -33,7 +38,8 @@ export default function PokemonModal() {
   const [formError] = React.useState(actionData?.error || '')
   const [formData, setFormData] = React.useState({
     name: '',
-    weight: '0',
+    height: '',
+    weight: '',
   })
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -56,6 +62,12 @@ export default function PokemonModal() {
           label="Name"
           value={formData.name}
           onChange={(e) => handleChange(e, 'name')}
+        />
+        <FormField
+          htmlFor="height"
+          label="Height"
+          value={formData.height}
+          onChange={(e) => handleChange(e, 'height')}
         />
         <FormField
           htmlFor="weight"

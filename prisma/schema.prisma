@@ -26,6 +26,7 @@ model Pokemon {
   id String @id @map("_id") @default(auto()) @db.ObjectId
   createdAt DateTime @default(now())
   name String
+  height String
   weight String
   author User @relation(references: [id], fields: [authorId]) 
   authorId String @db.ObjectId

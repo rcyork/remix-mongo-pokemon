@@ -3,12 +3,14 @@ import { prisma } from './prisma.server'
 
 export const createPokemon = async (
   name: string,
+  height: string,
   weight: string,
   userId: string,
 ) => {
   await prisma.pokemon.create({
     data: {
       name,
+      height,
       weight,
       author: {
         connect: {
@@ -19,15 +21,19 @@ export const createPokemon = async (
   })
 }
 
-
-
-export const updatePokemon = async (name: string, weight: string, id: string) => {
+export const updatePokemon = async (
+  name: string,
+  height: string,
+  weight: string,
+  id: string,
+) => {
   await prisma.pokemon.update({
     where: {
       id,
     },
     data: {
       name,
+      height,
       weight,
     },
   })
@@ -47,6 +53,10 @@ export const getPokemonById = async (id: string) => {
       id,
     },
   })
+}
+
+export const getAllPokemon = async () => {
+  return await prisma.pokemon.findMany()
 }
 
 export const getFilteredPokemon = async (

@@ -22,11 +22,13 @@ export const loader: LoaderFunction = async ({ params }) => {
 export const action: ActionFunction = async ({ request }) => {
   const form = await request.formData()
   const name = form.get('name')
+  const height = form.get('height')
   const weight = form.get('weight')
   const id = form.get('id')
 
   if (
     typeof name !== 'string' ||
+    typeof height !== 'string' ||
     typeof weight !== 'string' ||
     typeof id !== 'string'
   ) {
@@ -40,7 +42,7 @@ export const action: ActionFunction = async ({ request }) => {
     return json({ error: 'Please provide a positive weight' }, { status: 400 })
   }
 
-  await updatePokemon(name, weight, id)
+  await updatePokemon(name, height, weight, id)
   return redirect('/home')
 }
 
@@ -51,12 +53,15 @@ export default function PokemonModal() {
 
   const [formData, setFormData] = React.useState({
     name: actionData?.fields?.name || pokemon.name,
+    height: actionData?.fields?.height || pokemon.height,
     weight: actionData?.fields?.weight || pokemon.weight,
     avatar: actionData?.fields?.avatar || pokemon.avatar || '',
   })
 
   const isValid =
-    formData.name !== pokemon.name || formData.weight !== pokemon.weight
+    formData.name !== pokemon.name ||
+    formData.height !== pokemon.height ||
+    formData.weight !== pokemon.weight
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -114,6 +119,13 @@ export default function PokemonModal() {
               label="Name"
               value={formData.name}
               onChange={(e) => handleChange(e, 'name')}
+            />
+            <FormField
+              htmlFor="height"
+              label="height"
+              value={formData.height}
+              onChange={(e) => handleChange(e, 'height')}
+              type="number"
             />
             <FormField
               htmlFor="weight"

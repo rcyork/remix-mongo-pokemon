@@ -24,10 +24,10 @@ export function SelectBox({
 }: props) {
   return (
     <div>
-      <label htmlFor={id} className="font-semibold text-blue-600">
+      <label htmlFor={id} className="font-semibold text-yellow-300">
         {label}
       </label>
-      <div className={`flex items-center ${containerClassName} my-2`}>
+      <div className={`flex items-center ${containerClassName} mt-2`}>
         <select
           className={`${className} appearance-none`}
           id={id}

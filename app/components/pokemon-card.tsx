@@ -37,6 +37,9 @@ export const PokemonCard: React.FC<PokemonCardProps> = ({ char }) => {
               name: {char.name}
             </div>
             <div className="flex items-center justify-center">
+              height: {char.height}
+            </div>
+            <div className="flex items-center justify-center">
               weight: {char.weight}
             </div>
           </div>
@@ -45,13 +48,13 @@ export const PokemonCard: React.FC<PokemonCardProps> = ({ char }) => {
           <div className="flex justify-between gap-4">
             <button
               onClick={() => navigate(`/home/edit/${char.id}`)}
-              className="w-full rounded-xl bg-yellow-300 px-3 py-2 font-semibold text-blue-600 transition duration-300 ease-in-out hover:-translate-y-1 hover:bg-yellow-400"
+              className="w-full rounded-xl bg-yellow-300 px-3 py-2 text-xs font-semibold text-blue-600 transition duration-300 ease-in-out hover:-translate-y-1 hover:bg-yellow-400"
             >
               Edit
             </button>
             <button
               onClick={() => navigate(`/home/delete/${char.id}`)}
-              className="w-full rounded-xl bg-red-500 px-3 py-2 font-semibold text-white transition duration-300 ease-in-out hover:-translate-y-1 hover:bg-red-700"
+              className="w-full rounded-xl bg-red-500 px-3 py-2 text-xs font-semibold text-white transition duration-300 ease-in-out hover:-translate-y-1 hover:bg-red-700"
             >
               Delete
             </button>
