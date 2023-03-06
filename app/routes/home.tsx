@@ -6,7 +6,6 @@ import { getAllPokemon } from '~/utils/pokemon.server'
 import { type Pokemon as IPokemon, type Profile } from '@prisma/client'
 import { SearchBar } from '~/components/search-bar'
 import { PokemonCard } from '~/components/pokemon-card'
-import React, { useEffect } from 'react'
 
 type RealCharRaw = {
   name: string
@@ -26,7 +25,28 @@ type RealCharSprites = {
 }
 
 export const loader: LoaderFunction = async ({ request }) => {
-  const createdPokemonRaw = await getAllPokemon()
+  const url = new URL(request.url)
+  const subset = url.searchParams.get('subset')
+  const sort = url.searchParams.get('sort')
+
+  const getAllRealPokemon = () =>
+    fetch('https://pokeapi.co/api/v2/pokemon?limit=10')
+      .then((res) => res.json())
+      .then((pokemonList) =>
+        Promise.all(
+          pokemonList.results.map(async (char: RealCharRaw) => {
+            const res = await fetch(
+              `https://pokeapi.co/api/v2/pokemon/${char.name}`,
+            )
+            return await res.json()
+          }),
+        ),
+      )
+
+  const [createdPokemonRaw, realPokemonRaw] = await Promise.all([
+    getAllPokemon(),
+    getAllRealPokemon(),
+  ])
 
   const createdPokemon = createdPokemonRaw.map((char) => {
     return {
@@ -34,15 +54,6 @@ export const loader: LoaderFunction = async ({ request }) => {
       author: true,
     }
   })
-
-  const res = await fetch('https://pokeapi.co/api/v2/pokemon?limit=10')
-  const pokemonList = await res.json()
-  const realPokemonRaw: RealChar[] = await Promise.all(
-    pokemonList.results.map(async (char: RealCharRaw) => {
-      const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${char.name}`)
-      return await res.json()
-    }),
-  )
 
   const realPokemon: Pokemon[] = realPokemonRaw.map((char: RealChar) => {
     return {
@@ -55,7 +66,80 @@ export const loader: LoaderFunction = async ({ request }) => {
     }
   })
 
-  return json({ createdPokemon, realPokemon })
+  const allPokemon = [...createdPokemon, ...realPokemon]
+
+  let subsetToUse
+  const type = subset
+
+  switch (type) {
+    case 'created':
+      subsetToUse = [...createdPokemon]
+      break
+    case 'real':
+      subsetToUse = [...realPokemon]
+      break
+    default:
+      subsetToUse = [...allPokemon]
+      break
+  }
+
+  let sortedPokemon
+  const sortStyle = sort
+
+  switch (sortStyle) {
+    case 'name asc':
+      sortedPokemon = subsetToUse.sort((a, b) => {
+        const nameA = a.name.toUpperCase()
+        const nameB = b.name.toUpperCase()
+        if (nameA < nameB) {
+          return -1
+        }
+        if (nameA > nameB) {
+          return 1
+        }
+
+        return 0
+      })
+      break
+    case 'name desc':
+      sortedPokemon = subsetToUse.sort((a, b) => {
+        const nameA = a.name.toUpperCase()
+        const nameB = b.name.toUpperCase()
+        if (nameB < nameA) {
+          return -1
+        }
+        if (nameB > nameA) {
+          return 1
+        }
+
+        return 0
+      })
+      break
+    case 'height asc':
+      sortedPokemon = subsetToUse.sort(
+        (a, b) => parseInt(a.height) - parseInt(b.height),
+      )
+      break
+    case 'height desc':
+      sortedPokemon = subsetToUse.sort(
+        (a, b) => parseInt(b.height) - parseInt(a.height),
+      )
+      break
+    case 'weight asc':
+      sortedPokemon = subsetToUse.sort(
+        (a, b) => parseInt(a.weight) - parseInt(b.weight),
+      )
+      break
+    case 'weight desc':
+      sortedPokemon = subsetToUse.sort(
+        (a, b) => parseInt(b.weight) - parseInt(a.weight),
+      )
+      break
+    default:
+      sortedPokemon = subsetToUse
+      break
+  }
+  return json({ sortedPokemon })
 }
 
 export interface PokemonWithAuthor extends IPokemon {
@@ -88,94 +172,7 @@ export type Filters = {
 
 export default function Home() {
   const navigate = useNavigate()
-  const { createdPokemon, realPokemon } = useLoaderData()
-
-  const allPokemon = [...createdPokemon, ...realPokemon]
-
-  const [filters, setFilters] = React.useState<Filters>({
-    type: 'all',
-    sort: '',
-  })
-
-  const [pokemon, setPokemon] = React.useState<Pokemon[]>(allPokemon)
-
-  console.log('AAAAAAAAA', pokemon)
-
-  useEffect(() => {
-    let subset: Pokemon[]
-    const type = filters.type
-
-    switch (type) {
-      case 'created':
-        subset = createdPokemon
-        break
-      case 'real':
-        subset = realPokemon
-        break
-      default:
-        subset = allPokemon
-        break
-    }
-
-    let sortedPokemon
-    const sortStyle = filters.sort
-
-    switch (sortStyle) {
-      case 'name asc':
-        sortedPokemon = subset.sort((a, b) => {
-          const nameA = a.name.toUpperCase()
-          const nameB = b.name.toUpperCase()
-          if (nameA < nameB) {
-            return -1
-          }
-          if (nameA > nameB) {
-            return 1
-          }
-
-          return 0
-        })
-        break
-      case 'name desc':
-        sortedPokemon = subset.sort((a, b) => {
-          const nameA = a.name.toUpperCase()
-          const nameB = b.name.toUpperCase()
-          if (nameB < nameA) {
-            return -1
-          }
-          if (nameB > nameA) {
-            return 1
-          }
-
-          return 0
-        })
-        break
-      case 'height asc':
-        sortedPokemon = subset.sort(
-          (a, b) => parseInt(a.height) - parseInt(b.height),
-        )
-        break
-      case 'height desc':
-        sortedPokemon = subset.sort(
-          (a, b) => parseInt(b.height) - parseInt(a.height),
-        )
-        break
-      case 'weight asc':
-        sortedPokemon = subset.sort(
-          (a, b) => parseInt(a.weight) - parseInt(b.weight),
-        )
-        break
-      case 'weight desc':
-        sortedPokemon = subset.sort(
-          (a, b) => parseInt(b.weight) - parseInt(a.weight),
-        )
-        break
-      default:
-        sortedPokemon = subset
-        break
-    }
-
-    setPokemon(sortedPokemon)
-  }, [filters])
+  const { sortedPokemon } = useLoaderData()
 
   return (
     <Layout>
@@ -192,7 +189,7 @@ export default function Home() {
           </form>
         </div>
         <div className="flex flex-col">
-          <SearchBar filters={filters} setFilters={setFilters} />
+          <SearchBar />
           <div className="my-8 flex w-full justify-end">
             <button
               onClick={() => navigate(`/home/create`)}
@@ -203,7 +200,7 @@ export default function Home() {
           </div>
           <div className="flex w-full flex-1 flex-col gap-y-4">
             <div className="flex flex-wrap gap-4">
-              {pokemon.map((char: Pokemon) => {
+              {sortedPokemon.map((char: Pokemon) => {
                 return <PokemonCard key={char.id} char={char} />
               })}
             </div>

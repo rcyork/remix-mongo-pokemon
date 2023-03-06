@@ -33,7 +33,7 @@ export function SelectBox({
           id={id}
           name={name}
           onChange={onChange}
-          value={value || ''}
+          value={value ?? undefined}
         >
           {options.map((option) => (
             <option key={option.name} value={option.value}>
