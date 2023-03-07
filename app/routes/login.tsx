@@ -123,7 +123,7 @@ export default function Login() {
 
   return (
     <Layout>
-      <div className="flex h-full flex-col items-center justify-center gap-y-4">
+      <div className="flex h-screen flex-col items-center justify-center gap-y-4">
         <button
           onClick={() => setAction(action == 'login' ? 'register' : 'login')}
           className="absolute top-8 right-8 rounded-xl bg-yellow-300 px-3 py-2 font-semibold text-blue-600 transition duration-300 ease-in-out hover:-translate-y-1 hover:bg-yellow-400"
